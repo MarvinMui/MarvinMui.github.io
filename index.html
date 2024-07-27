@@ -1,4 +1,96 @@
-"Hello World"
+<html>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<style> circle {fill: lightblue; stroke: black;} </style>
+<body onload='init()'>
+<svg width=300 height=300>
+</svg>
+<button id='1' onclick="transitionOne()">Click</button>
 <script>
-    console.log("hellow world");
+async function init() {
+xd = [0,12];
+xr = [0,600];
+<!--xs = d3.scaleLog(xd,xr);-->
+xs = d3.scaleLinear().domain(xd).range(xr);
+
+yd = [10,150];
+yr = [600,0];
+ys = d3.scaleLog(yd,yr);
+
+const data = await d3.csv("https://flunky.github.io/cars2017.csv");
+console.log(data);
+
+d3.select('svg')
+  .attr('width', 700)
+  .attr('height', 700)
+  .append('g')
+    .attr('transform', 'translate(50,50)')
+  .selectAll('circle')
+  .data(data)
+  .enter()
+  .append('circle')
+    .attr('cx', function(d,i) {return xs(d.EngineCylinders);})
+    .attr('cy', function(d,i) {return ys(Number(d.AverageCityMPG));})
+    .attr('r', function(d,i) {return 2;});
+
+d3.select('svg').append('g')
+  .attr('transform', 'translate(50,50)')
+  .call(d3.axisLeft(ys)
+    .tickValues([10,20,50,100])
+    .tickFormat(d3.format("~s")));
+
+d3.select('svg').append('g')
+  .attr('transform', 'translate(50,650)')
+  .call(d3.axisBottom(xs)
+    .tickFormat(d3.format("~s")));
+
+}
+async function transitionOne() {
+console.log("transition One");
+d3.selectAll("svg > *").remove();
+
+
+xd = [10,150];
+xr = [0,250];
+xs = d3.scaleLog(xd,xr);
+
+yd = [10,150];
+yr = [200,0];
+ys = d3.scaleLog(yd,yr);
+
+const data = await d3.csv("https://flunky.github.io/cars2017.csv");
+
+d3.select('svg')
+  .attr('width', 1000)
+  .attr('height', 1000)
+  .append('g')
+    .attr('transform', 'translate(50,50)')
+  .selectAll('circle')
+  .data(data)
+  .enter()
+  .append('circle')
+    .attr('cx', function(d,i) {return xs(Number(d.AverageCityMPG));})
+    .attr('cy', function(d,i) {return ys(Number(d.AverageHighwayMPG));})
+    .attr('r', function(d,i) {return 2 + Number(d.EngineCylinders);});
+
+d3.select('svg').append('g')
+  .attr('transform', 'translate(50,50)')
+  .call(d3.axisLeft(ys)
+    .tickValues([10,20,50,100])
+    .tickFormat(d3.format("~s")));
+
+d3.select('svg').append('g')
+  .attr('transform', 'translate(50,250)')
+  .call(d3.axisBottom(xs)
+    .tickValues([10,20,50,100])
+    .tickFormat(d3.format("~s")));
+
+document.getElementById("1").onclick = transitionTwo;
+}
+
+async function transitionTwo() {
+console.log("transition Two");
+
+}
 </script>
+</body>
+</html>
