@@ -1,6 +1,7 @@
 <html>
 <script src='https://d3js.org/d3.v5.min.js'></script>
 <style> circle {fill: lightblue; stroke: black;} </style>
+<style> rect {fill: lightblue; stroke: black; }</style>
 
 <head>
   <title>Marvin Mui Data Visualization Project 2 </title>
@@ -36,7 +37,7 @@ async function init() {
       .append('circle')
         .attr('cx', function(d,i) {return xs(d.EngineCylinders);})
         .attr('cy', function(d,i) {return ys(Number(d.AverageCityMPG));})
-        .attr('r', function(d,i) {return 2;});
+        .attr('r', function(d,i) {return 4;});
 
     d3.select('svg').append('g')
       .attr('transform', 'translate(50,50)')
@@ -79,7 +80,7 @@ async function sceneOne() {
       .append('circle')
         .attr('cx', function(d,i) {return xs(d.EngineCylinders);})
         .attr('cy', function(d,i) {return ys(Number(d.AverageHighwayMPG));})
-        .attr('r', function(d,i) {return 2;});
+        .attr('r', function(d,i) {return 4;});
 
     d3.select('svg').append('g')
       .attr('transform', 'translate(50,50)')
@@ -96,8 +97,102 @@ async function sceneOne() {
 }
 
 async function sceneTwo() {
-    document.getElementById('h1').innerHTML = "Fuel Type vs MPG";
+    document.getElementById('h1').innerHTML = "Fuel Type vs avg MPG";
+    d3.selectAll("svg > *").remove();
+
     console.log("transition Two");
+
+    const data = await d3.csv("https://flunky.github.io/cars2017.csv");
+
+    const types = [];
+    for (let i = 0; i < data.length; i++) {
+      if (types.indexOf(data[i].Fuel) == -1)
+        {
+          types.push(data[i].Fuel);
+        }
+    }
+
+    const avg_city_mpg = [0,0,0];
+    const avg_hw_mpg = [0,0,0];
+
+    const fuel_count = {gasoline: 0, diesel: 0, electricity:0};
+
+    for (let i = 0; i < data.length; i++) {
+
+      if (data[i].Fuel == "Gasoline")
+        {
+          avg_city_mpg[0] += Number(data[i].AverageCityMPG);
+          avg_hw_mpg[0] += Number(data[i].AverageHighwayMPG);
+          fuel_count.gasoline += 1;
+        }
+      if (data[i].Fuel == "Diesel")
+        {
+          avg_city_mpg[1] += Number(data[i].AverageCityMPG);
+          avg_hw_mpg[1] += Number(data[i].AverageHighwayMPG);
+          fuel_count.diesel += 1;
+        }
+      if (data[i].Fuel == "Electricity")
+        {
+          avg_city_mpg[2] += Number(data[i].AverageCityMPG);
+          avg_hw_mpg[2] += Number(data[i].AverageHighwayMPG);
+          fuel_count.electricity += 1;
+        }
+    }
+
+    avg_city_mpg[0] /= fuel_count.gasoline;
+    avg_city_mpg[1] /= fuel_count.diesel;
+    avg_city_mpg[2] /= fuel_count.electricity;
+
+    avg_hw_mpg[0] /= fuel_count.gasoline;
+    avg_hw_mpg[1] /= fuel_count.diesel;
+    avg_hw_mpg[2] /= fuel_count.electricity;
+
+    console.log(avg_city_mpg);
+    console.log(avg_hw_mpg);
+
+    xd = [0,2];
+    xr = [0,600];
+    xs = d3.scaleLinear().domain(xd).range(xr);
+
+    hd = [0,120];
+    hr = [0,600];
+    hs = d3.scaleLinear().domain(hd).range(hr);
+
+    yd = [0,120];
+    yr = [600,0];
+    ys = d3.scaleLinear().domain(yd).range(yr);
+
+    xaxis = d3.scaleBand()
+              .domain(["Gasoline", "Diesel", "Electricity"])
+              .range([0,600]);
+
+    width = d3.scaleBand()
+              .domain([0, 1, 2])
+              .range([0,600]);
+
+    d3.select('svg')
+      .attr('width', 700)
+      .attr('height', 700)
+      .append('g')
+        .attr('transform', 'translate(50,50)')
+      .selectAll('rect')
+      .data(avg_city_mpg)
+      .enter()
+      .append('rect')
+        .attr('x', function(d,i) {return width(i);})
+        .attr('y', function(d,i) {return 600-hs(d);})
+        .attr('width',function(d,i) {return xaxis.bandwidth();})
+        .attr('height',function(d,i) {return hs(d);});
+
+    d3.select('svg').append('g')
+      .attr('transform', 'translate(50,50)')
+      .call(d3.axisLeft(ys)
+        .tickValues([10,20,50,100])
+        .tickFormat(d3.format("~s")));
+
+    d3.select('svg').append('g')
+      .attr('transform', 'translate(50,650)')
+      .call(d3.axisBottom(xaxis));
 
 }
 </script>
