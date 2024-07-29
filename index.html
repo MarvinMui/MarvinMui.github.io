@@ -1,5 +1,6 @@
 <html>
 <script src='https://d3js.org/d3.v5.min.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
 <style> circle {fill: lightblue; stroke: black;} </style>
 <style> rect {fill: steelblue; stroke: black; }</style>
 <style> #tooltip {
@@ -40,42 +41,21 @@ async function init() {
     const type = d3.annotationLabel;
 
     const annotations = [{
-    note: {
-      label: "Longer text to show text wrapping",
-      bgPadding: 20,
-      title: "Annotations :)"
-    },
-    //can use x, y directly instead of data
-    data: { date: "18-Sep-09", close: 185.02 },
-    className: "show-bg",
-    dy: 137,
-    dx: 162
-  }]
+      note: {
+                label: "There is a clear negative correlation with the number of cylinders and the corresponding MPG when driving in a city",
+                title: "Downward Sloping Trendline",
+                bgPadding: 10,
+              },
+              x: 400,
+              y: 500,
+              dy: -100,
+              dx: 100
+    }]
 
-const parseTime = d3.timeParse("%d-%b-%y")
-const timeFormat = d3.timeFormat("%d-%b-%y")
+    const makeAnnotations = d3.annotation()
+              .type(d3.annotationLabel)
+              .annotations(annotations)
 
-const x = d3.scaleTime().range([0, 800])
-const y = d3.scaleLinear().range([300, 0])
-
-const makeAnnotations = d3.annotation()
-  .editMode(true)
-  .notePadding(15)
-  .type(type)
-  .accessors({
-    x: d => x(parseTime(d.date)),
-    y: d => y(d.close)
-  })
-  .accessorsInverse({
-     date: d => timeFormat(x.invert(d.x)),
-     close: d => y.invert(d.y)
-  })
-  .annotations(annotations)
-
-d3.select("svg")
-  .append("g")
-  .attr("class", "annotation-group")
-  .call(makeAnnotations)
 
     d3.select('svg')
       .attr('width', 700)
@@ -100,6 +80,11 @@ d3.select("svg")
           tooltip.style("opacity", 0);
           d3.select(this).attr('opacity', '1');
       });
+
+    d3.select("svg")
+      .append("g")
+      .attr("class", "annotation-group")
+      .call(makeAnnotations);
 
 
     d3.select('svg').append('g')
@@ -132,6 +117,37 @@ async function sceneOne() {
     const data = await d3.csv("https://flunky.github.io/cars2017.csv");
     console.log(data);
     var tooltip = d3.select("#tooltip");
+
+    const type = d3.annotationLabel;
+
+    const annotations = [{
+      note: {
+                label: "The trend continues to support the same conclusion for cars on the highway: more cylinders = less efficient",
+                title: "Downward Sloping Trendline",
+                bgPadding: 10,
+              },
+              x: 400,
+              y: 450,
+              dy: -100,
+              dx: 100
+    },{
+          note: {
+                label: "However, there is an unexplained group with unexpectedly high MPG... where did they come from?",
+                title: "Grouped Outliers",
+                bgPadding: 10,
+              },
+              x: 50,
+              y: 100,
+              dy: 0,
+              dx: 150,
+          subject: {
+            radius: 50, radiusPadding: 10
+          }
+    }]
+
+    const makeAnnotations = d3.annotation()
+              .type(d3.annotationLabel)
+              .annotations(annotations)
 
     d3.select('svg')
       .attr('width', 700)
@@ -168,6 +184,12 @@ async function sceneOne() {
       .call(d3.axisBottom(xs)
         .tickFormat(d3.format("~s")));
 
+    d3.select("svg")
+      .append("g")
+      .attr("class", "annotation-group")
+      .call(makeAnnotations);
+
+
     document.getElementById("1").onclick = sceneTwo;
 }
 
@@ -179,6 +201,22 @@ async function sceneTwo() {
 
     const data = await d3.csv("https://flunky.github.io/cars2017.csv");
     var tooltip = d3.select('#tooltip');
+
+    const type = d3.annotationLabel;
+
+    const annotations = [{
+      note: {
+                label: "The car type that far outstrips others in terms of efficiency is the electric car",
+                title: "The Culprit: Electric Cars",
+                bgPadding: 10,
+              },
+              x: 300,
+              y: 200,
+    }]
+
+    const makeAnnotations = d3.annotation()
+              .type(d3.annotationLabel)
+              .annotations(annotations)
 
     const avg_city_mpg = [0,0,0];
     const avg_hw_mpg = [0,0,0];
@@ -273,6 +311,11 @@ async function sceneTwo() {
     d3.select('svg').append('g')
       .attr('transform', 'translate(50,650)')
       .call(d3.axisBottom(xaxis));
+
+    d3.select("svg")
+      .append("g")
+      .attr("class", "annotation-group")
+      .call(makeAnnotations);
 
     document.getElementById("1").onclick = sceneThree;
 
