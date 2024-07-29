@@ -6,8 +6,8 @@
       opacity: 0;
       position: absolute;
       text-align:center;
-      width: 220px; height: 60px;
-      background: gray;
+      width: 240px; height: 60px;
+      background: lightgray;
       border: 0px;
 } </style>
 
@@ -132,25 +132,18 @@ async function sceneOne() {
 }
 
 async function sceneTwo() {
-    document.getElementById('h1').innerHTML = "Fuel Type vs avg MPG";
+    document.getElementById('h1').innerHTML = "Fuel Type vs Average City MPG";
     d3.selectAll("svg > *").remove();
 
     console.log("transition Two");
 
     const data = await d3.csv("https://flunky.github.io/cars2017.csv");
     var tooltip = d3.select('#tooltip');
-    const types = [];
-    for (let i = 0; i < data.length; i++) {
-      if (types.indexOf(data[i].Fuel) == -1)
-        {
-          types.push(data[i].Fuel);
-        }
-    }
 
     const avg_city_mpg = [0,0,0];
     const avg_hw_mpg = [0,0,0];
 
-    const fuel_count = {gasoline: 0, diesel: 0, electricity:0};
+    const fuel_count = [0,0,0];
 
     for (let i = 0; i < data.length; i++) {
 
@@ -158,29 +151,29 @@ async function sceneTwo() {
         {
           avg_city_mpg[0] += Number(data[i].AverageCityMPG);
           avg_hw_mpg[0] += Number(data[i].AverageHighwayMPG);
-          fuel_count.gasoline += 1;
+          fuel_count[0] += 1;
         }
       if (data[i].Fuel == "Diesel")
         {
           avg_city_mpg[1] += Number(data[i].AverageCityMPG);
           avg_hw_mpg[1] += Number(data[i].AverageHighwayMPG);
-          fuel_count.diesel += 1;
+          fuel_count[1] += 1;
         }
       if (data[i].Fuel == "Electricity")
         {
           avg_city_mpg[2] += Number(data[i].AverageCityMPG);
           avg_hw_mpg[2] += Number(data[i].AverageHighwayMPG);
-          fuel_count.electricity += 1;
+          fuel_count[2] += 1;
         }
     }
 
-    avg_city_mpg[0] /= fuel_count.gasoline;
-    avg_city_mpg[1] /= fuel_count.diesel;
-    avg_city_mpg[2] /= fuel_count.electricity;
+    avg_city_mpg[0] /= fuel_count[0];
+    avg_city_mpg[1] /= fuel_count[1];
+    avg_city_mpg[2] /= fuel_count[2];
 
-    avg_hw_mpg[0] /= fuel_count.gasoline;
-    avg_hw_mpg[1] /= fuel_count.diesel;
-    avg_hw_mpg[2] /= fuel_count.electricity;
+    avg_hw_mpg[0] /= fuel_count[0];
+    avg_hw_mpg[1] /= fuel_count[1];
+    avg_hw_mpg[2] /= fuel_count[2];
 
     console.log(avg_city_mpg);
     console.log(avg_hw_mpg);
@@ -197,8 +190,9 @@ async function sceneTwo() {
     yr = [600,0];
     ys = d3.scaleLinear().domain(yd).range(yr);
 
+    xaxisd = ["Gasoline", "Diesel", "Electricity"];
     xaxis = d3.scaleBand()
-              .domain(["Gasoline", "Diesel", "Electricity"])
+              .domain(xaxisd)
               .range([0,600]);
 
     width = d3.scaleBand()
@@ -222,7 +216,7 @@ async function sceneTwo() {
           tooltip.style("opacity", 1)
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY - 10) + "px")
-                 .html("hi");
+                 .html("Average MPG for " + xaxisd[i] + ": " + d + "<br>Over a sample of " + fuel_count[i] + " different car makes");
           d3.select(this).attr('opacity', '0.85');
       })
       .on("mouseout", function() {
